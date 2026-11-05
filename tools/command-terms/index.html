@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DP化学 指示用語の日英対訳</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout: lab-notebook page. Graph-paper header, filter bar, cards grouped by answer type. */
+:root{
+  --ink:#1c2a3a;
+  --muted:#5b6878;
+  --paper:#f6f8fa;
+  --card:#ffffff;
+  --rule:#d8dfe7;
+  --accent:#1f5fa8;
+  --accent-soft:#e3edf8;
+  --warn:#9a5b00;
+  --warn-soft:#fbf1df;
+  --ok:#2e6b3f;
+  --ok-soft:#e5f2e8;
+  --grid:rgba(31,95,168,.07);
+  --font-display:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --font-body:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#e4eaf1;--muted:#9aa8b8;--paper:#11171e;--card:#18212b;--rule:#2b3846;
+    --accent:#7fb2ec;--accent-soft:#1d2f45;--warn:#f0b866;--warn-soft:#3a2c17;
+    --ok:#8fd0a0;--ok-soft:#1c3324;--grid:rgba(127,178,236,.07);color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#e4eaf1;--muted:#9aa8b8;--paper:#11171e;--card:#18212b;--rule:#2b3846;
+  --accent:#7fb2ec;--accent-soft:#1d2f45;--warn:#f0b866;--warn-soft:#3a2c17;
+  --ok:#8fd0a0;--ok-soft:#1c3324;--grid:rgba(127,178,236,.07);color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);line-height:1.75;font-size:16px}
+header{
+  background-color:var(--card);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;border-bottom:1px solid var(--rule);
+}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+header .wrap{padding-top:40px;padding-bottom:32px}
+.kicker{font-family:var(--font-mono);font-size:13px;color:var(--accent);letter-spacing:.04em;margin:0 0 6px}
+h1{font-family:var(--font-display);font-size:clamp(26px,4vw,38px);line-height:1.3;margin:0 0 14px;text-wrap:balance}
+.lead{max-width:44em;margin:0;color:var(--ink)}
+h2{font-family:var(--font-display);font-size:22px;margin:0 0 4px;text-wrap:balance}
+h3{font-family:var(--font-display);font-size:18px;margin:0}
+section{padding:36px 0 8px}
+.intro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px}
+.box{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:18px 20px}
+.box p{margin:6px 0 0}
+.box h3{font-size:16px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule);border-radius:8px;overflow:hidden;margin-top:14px;background:var(--card)}
+.compare > div{padding:16px 18px}
+.compare > div + div{border-left:1px solid var(--rule)}
+.compare .tag{font-family:var(--font-mono);font-size:13px;color:var(--accent)}
+.compare p{margin:6px 0 0}
+.toolbar{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);padding:12px 0}
+.toolbar .wrap{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.toolbar label{font-size:14px;color:var(--muted)}
+#q{flex:1 1 220px;min-width:0;font:inherit;font-size:15px;padding:8px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--card);color:var(--ink)}
+#q:focus,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--rule);background:var(--card);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--card)}
+.group-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:28px 0 12px}
+.group-head p{margin:0;color:var(--muted);font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.term{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.en{font-family:var(--font-mono);font-size:19px;color:var(--accent)}
+.ja{font-family:var(--font-display);font-weight:700;font-size:17px}
+.what{margin:0}
+.ex{background:var(--accent-soft);border-radius:6px;padding:10px 12px;font-size:14.5px}
+.ex b{display:block;font-size:12px;color:var(--accent);letter-spacing:.04em}
+.ex p{margin:2px 0 0}
+.pit{background:var(--warn-soft);border-radius:6px;padding:8px 12px;font-size:14px;color:var(--ink)}
+.pit b{color:var(--warn)}
+.empty{display:none;color:var(--muted);padding:20px 0}
+.note{font-size:14px;color:var(--muted)}
+footer{border-top:1px solid var(--rule);margin-top:48px;padding:24px 0 40px;font-size:13.5px;color:var(--muted)}
+footer p{margin:4px 0;max-width:60em}
+sub,sup{font-size:.75em;line-height:0}
+@media (max-width:640px){
+  .compare{grid-template-columns:1fr}
+  .compare > div + div{border-left:0;border-top:1px solid var(--rule)}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+<link rel="stylesheet" href="/assets/bar.css">
+</head>
+<body>
+<header class="oc-bar"><div class="oc-bar-in"><a class="oc-logo" href="/"><svg width="18" height="26" viewBox="0 0 18 26" aria-hidden="true"><path d="M9 1C11.5 4.5 13 6.6 13 8.6A4 4 0 0 1 5 8.6C5 6.6 6.5 4.5 9 1Z" fill="var(--oc-flame)"/><rect x="5" y="12" width="8" height="13" rx="1.5" fill="none" stroke="var(--oc-ink)" stroke-width="1.5"/><line x1="9" y1="10" x2="9" y2="12" stroke="var(--oc-ink)" stroke-width="1.2"/></svg><span>ひとつのろうそく</span><small>日本語で学ぶDP化学</small></a><nav class="oc-nav" aria-label="サイト内"><a href="/teaching/">授業と実験</a><a href="/tools/" aria-current="page">学習ツール</a><a href="/ia-guide/">IAガイド</a><a href="/practice/">実践記録</a><a href="/about/">このサイトについて</a></nav></div></header>
+<header>
+  <div class="wrap">
+    <p class="kicker">IB DP CHEMISTRY · COMMAND TERMS</p>
+    <h1>DP化学 指示用語の日英対訳と答え方</h1>
+    <p class="lead">IBの試験問題は、文頭の指示用語（command term）で「何をどこまで書けば得点になるか」が決まります。このページでは、DP化学でよく使われる指示用語について、英語と日本語の対応、求められている答え方、化学の例題、よくある失点を、答え方の型ごとにまとめました。</p>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <section aria-labelledby="how">
+    <h2 id="how">使い方の3つのポイント</h2>
+    <div class="intro-grid">
+      <div class="box">
+        <h3>1. まず指示用語に印をつける</h3>
+        <p>問題を読んだら、最初に指示用語を丸で囲みます。内容を知っていても、求められていない形で答えると点になりません。</p>
+      </div>
+      <div class="box">
+        <h3>2. 配点から書く量を決める</h3>
+        <p>配点が［2］なら、採点項目が2つあると考えて、別々の要素を2つ書くのが目安です。同じ内容を言い換えても点は増えません。</p>
+      </div>
+      <div class="box">
+        <h3>3. 日本語と英語の両方で覚える</h3>
+        <p>日本語で受験する場合、試験では日本語の指示語で出題されます。英語の教科書や過去問も使うので、両方を対応させて覚えておくと迷いません。</p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:32px">「詳しく述べる」と「説明する」の違い</h2>
+    <p class="note" style="margin:0">最も点を落としやすい組み合わせです。同じ現象で比べます。</p>
+    <div class="compare">
+      <div>
+        <span class="tag">Describe ＝ 詳しく述べなさい</span>
+        <p><b>何が起きるか</b>を書きます。</p>
+        <p>マグネシウムリボンを希塩酸に入れると、表面から気体の泡が激しく発生し、リボンはしだいに小さくなって溶けてなくなる。溶液の温度が上がる。</p>
+      </div>
+      <div>
+        <span class="tag">Explain ＝ 説明しなさい</span>
+        <p><b>なぜそうなるか</b>を書きます。</p>
+        <p>マグネシウムは水素よりイオン化傾向が大きいため、Mg が電子を失って Mg<sup>2+</sup> に酸化され、その電子を H<sup>+</sup> が受け取って H<sub>2</sub> に還元される。この反応は発熱反応なので温度が上がる。</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toolbar" role="search">
+  <div class="wrap">
+    <label for="q">検索</label>
+    <input id="q" type="search" placeholder="英語・日本語どちらでも（例：Deduce、評価）" autocomplete="off">
+    <div class="chips" id="chips" aria-label="答え方の型で絞り込む"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="list"></div>
+  <p class="empty" id="empty">該当する指示用語がありません。別の言葉で検索してください。</p>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>2026年11月 初版</p>
+    <p>本ページは、国際バカロレア機構（IBO）とは関係のない、個人が作成した学習資料です。解説と例題はすべて筆者のオリジナルで、IBの定義文は掲載していません。指示用語の正式な一覧と定義は、最新の「化学」指導の手引き（Chemistry guide）の Glossary of command terms で確認してください。日本語訳は本ページでの訳で、IBの日本語版資料の訳と異なる場合があります。</p>
+  </div>
+</footer>
+<footer class="oc-foot"><div class="oc-foot-in">
+<p><span class="oc-foot-name">ひとつのろうそく</span>（onecandle-chem.com）　日本語で学ぶ・教えるDP化学</p>
+<p>本サイトは、国際バカロレア機構（IBO）とは関係のない、個人が運営する学習資料のサイトです。教材とツールは作成者のオリジナルで、IBの過去問・マークスキーム・指導の手引きの文章は掲載していません。</p>
+<p>一部の教材は AI を使って作成し、作成者が内容を確認しています。利用条件は<a href="/about/#terms">このサイトについて</a>をご覧ください。</p>
+</div></footer>
+
+<script>
+const GROUPS = [
+  {id:"short", name:"短く答える", desc:"名称・値・用語だけを答える。理由は不要。"},
+  {id:"calc", name:"数値・計算", desc:"途中の過程そのものが採点される。"},
+  {id:"explain", name:"説明の深さ", desc:"どこまで詳しく、理由まで書くかが分かれる。"},
+  {id:"judge", name:"推論・判断", desc:"与えられた情報から考え、結論や判断を示す。"},
+  {id:"draw", name:"図・グラフ", desc:"図の正確さとラベルが採点される。"},
+  {id:"inquiry", name:"実験の計画", desc:"IAや試験問題1Bでよく使われる。"}
+];
+
+const TERMS = [
+  // short
+  {g:"short", en:"State", ja:"述べなさい", what:"名称、数値、結果などを短く答えます。理由や計算の過程は求められていません。",
+   q:"25 °C で中性の水溶液の pH を述べなさい。", a:"7", pit:"理由を長く書いても加点はありません。時間を次の問題に回しましょう。"},
+  {g:"short", en:"List", ja:"列挙しなさい", what:"短い答えを、説明をつけずに複数並べます。",
+   q:"反応速度を大きくする方法を2つ列挙しなさい。", a:"温度を上げる。反応物の濃度を上げる。（触媒を加える、固体の表面積を大きくする なども可）", pit:"指定された数だけ書きます。余分に書いても得点は増えず、誤りが混じると不利になることがあります。"},
+  {g:"short", en:"Define", ja:"定義しなさい", what:"用語や物理量の意味を、条件まで含めて正確に書きます。",
+   q:"第一イオン化エネルギーを定義しなさい。", a:"気体状態の原子 1 mol から電子を 1 mol ずつ取り去り、気体状態の1価の陽イオン 1 mol をつくるのに必要なエネルギー。", pit:"「気体状態」や「1 mol」などの条件を落とすと得点になりません。"},
+  {g:"short", en:"Identify", ja:"特定しなさい", what:"いくつかの候補や与えられた情報の中から、答えを1つ選んで示します。",
+   q:"Zn + Cu<sup>2+</sup> → Zn<sup>2+</sup> + Cu の反応で、酸化剤として働く化学種を特定しなさい。", a:"Cu<sup>2+</sup>", pit:"「Cu」と書くと誤りです。電荷まで正確に書きましょう。"},
+  {g:"short", en:"Classify", ja:"分類しなさい", what:"決まった観点で、グループや種類に分けます。",
+   q:"CH<sub>3</sub>CH<sub>2</sub>OH、CH<sub>3</sub>CHO、CH<sub>3</sub>COOH を化合物の種類で分類しなさい。", a:"アルコール、アルデヒド、カルボン酸", pit:"何の観点で分けたか（ここでは官能基）が分かる名称を使います。"},
+  {g:"short", en:"Measure", ja:"測定しなさい", what:"図やグラフ、器具から値を読み取ります。",
+   q:"図のビュレットの目盛りを読み取りなさい。", a:"最小目盛りの 1/10 まで読み、単位をつけて答える（例：12.35 cm<sup>3</sup>）。", pit:"単位の書き忘れと、読み取りの桁数の不足に注意します。"},
+  // calc
+  {g:"calc", en:"Calculate", ja:"計算しなさい", what:"数値の答えを、途中の計算過程を示しながら求めます。",
+   q:"0.100 mol dm<sup>−3</sup> の NaOH 水溶液 25.00 cm<sup>3</sup> を中和するのに必要な 0.0500 mol dm<sup>−3</sup> の H<sub>2</sub>SO<sub>4</sub> 水溶液の体積を計算しなさい。", a:"n(NaOH) = 0.00250 mol、n(H<sub>2</sub>SO<sub>4</sub>) = 0.00250 ÷ 2 = 0.00125 mol、V = 0.00125 ÷ 0.0500 = 0.0250 dm<sup>3</sup> = 25.0 cm<sup>3</sup>", pit:"化学反応式の係数比の見落とし、単位の換算忘れ、有効数字の桁数が典型的な失点です。"},
+  {g:"calc", en:"Determine", ja:"求めなさい", what:"考えられる唯一の答えを導き出します。",
+   q:"A の濃度を2倍にすると初速度が4倍になった。A についての反応次数を求めなさい。", a:"2次（2<sup>x</sup> = 4 より x = 2）", pit:"答えだけでなく、どのデータを比べたかを書くと確実です。"},
+  {g:"calc", en:"Estimate", ja:"見積もりなさい", what:"おおよその値を求めます。厳密な計算は求められていません。",
+   q:"沸点はブタン −1 °C、ヘキサン 69 °C である。ペンタンの沸点を見積もりなさい。", a:"約 35 °C（2つの値のほぼ中間）", pit:"見積もりでも、何を根拠にしたかが分かるように書きます。"},
+  {g:"calc", en:"Show", ja:"示しなさい", what:"計算や導出の過程を示します。答えが問題文にあるため、過程が得点の対象です。",
+   q:"試料中の炭酸カルシウムの質量パーセントが約 80 % になることを示しなさい。", a:"物質量 → 質量 → 割合 の順に、すべての式を書く。", pit:"結論だけを書くと得点になりません。最後に問題文の値と一致することを確認します。"},
+  {g:"calc", en:"Derive", ja:"導きなさい", what:"式を変形して、新しい式や関係を得ます。",
+   q:"PV = nRT から、気体のモル質量 M を求める式を導きなさい。", a:"n = m / M を代入し、PV = (m / M)RT より M = mRT / (PV)", pit:"代入した関係式（n = m / M）を省略しないで書きます。"},
+  // explain
+  {g:"explain", en:"Outline", ja:"概説しなさい", what:"要点を短くまとめて書きます。詳しい理由までは求められていません。",
+   q:"ルシャトリエの原理を概説しなさい。", a:"平衡状態にある系の条件を変えると、その変化を打ち消す向きに平衡が移動する。", pit:"詳しく書きすぎて時間を使わないようにします。"},
+  {g:"explain", en:"Describe", ja:"詳しく述べなさい", what:"何が起きるか、どのような様子かを詳しく書きます。",
+   q:"マグネシウムリボンを希塩酸に入れたときの様子を詳しく述べなさい。", a:"気体の泡が発生する、リボンが小さくなり溶けてなくなる、溶液の温度が上がる。", pit:"「水素が発生する」は観察ではなく推論です。観察を求められたら「気体の泡」と書きます。"},
+  {g:"explain", en:"Explain", ja:"説明しなさい", what:"理由や原因まで含めて詳しく書きます。「なぜなら」から結果までのつながりが必要です。",
+   q:"マグネシウムの第二イオン化エネルギーが第一イオン化エネルギーより大きい理由を説明しなさい。", a:"1個目の電子を取り去ると、残った電子は同じ核電荷からより強く引きつけられる（電子間の反発が減り、粒子が小さくなる）ため、2個目を取り去るにはより大きなエネルギーが必要になる。", pit:"「電子が減るから」だけでは、なぜ大きくなるのかのつながりが抜けています。"},
+  {g:"explain", en:"Distinguish", ja:"区別しなさい", what:"2つ以上のものの違いを明確にします。",
+   q:"強酸と弱酸を区別しなさい。", a:"強酸は水溶液中でほぼ完全に電離するが、弱酸は一部しか電離しない。", pit:"「強い・弱い」を濃度の濃い・薄いと混同しないようにします。"},
+  {g:"explain", en:"Compare and contrast", ja:"比較対照しなさい", what:"似ている点と違う点の両方を、常に両方に触れながら書きます。",
+   q:"ダイヤモンドと黒鉛の構造と性質を比較対照しなさい。", a:"どちらも炭素原子だけが共有結合でつながった共有結合の結晶である。ダイヤモンドは各炭素が4つの原子と結合した立体網目構造で電気を通さないが、黒鉛は各炭素が3つの原子と結合した層状構造で、非局在化した電子があるため電気を通す。", pit:"片方だけを説明して終わると得点が伸びません。文を対にして書きます。"},
+  // judge
+  {g:"judge", en:"Deduce", ja:"推論しなさい", what:"与えられた情報から論理的に結論を導きます。",
+   q:"ある元素の逐次イオン化エネルギーは、第三と第四の間で大きく増加する。この元素の族を推論しなさい。", a:"13族（最外殻電子が3個）", pit:"根拠となったデータ（どこで大きく増加したか）に触れると確実です。"},
+  {g:"judge", en:"Predict", ja:"予測しなさい", what:"起こると考えられる結果を答えます。",
+   q:"N<sub>2</sub> + 3H<sub>2</sub> ⇌ 2NH<sub>3</sub> の平衡で、圧力を上げると平衡はどちらに移動するか予測しなさい。", a:"右（NH<sub>3</sub> が生成する向き）", pit:"理由を求められていなければ結果だけで十分です。"},
+  {g:"judge", en:"Suggest", ja:"提案しなさい", what:"習っていない状況でも、化学的に筋の通った答えを考えて示します。答えは1つとは限りません。",
+   q:"実験で求めた中和エンタルピーの大きさが文献値より小さくなった理由を提案しなさい。", a:"反応で発生した熱の一部が、容器や周囲の空気に逃げたため。", pit:"「測定ミス」「計算ミス」のような具体性のない答えは得点になりません。"},
+  {g:"judge", en:"Justify", ja:"根拠を示しなさい", what:"答えや結論を支える、妥当な理由や証拠を示します。",
+   q:"この反応が発熱反応であることを、実験データを用いて根拠を示しなさい。", a:"反応中に溶液の温度が 21.3 °C から 28.6 °C に上昇したため。", pit:"データを使うよう指示されたら、具体的な数値を引用します。"},
+  {g:"judge", en:"Interpret", ja:"解釈しなさい", what:"データやグラフの傾向を読み取り、それが何を意味するかを結論づけます。",
+   q:"温度と反応速度のグラフを解釈しなさい。", a:"温度が上がるほど反応速度は大きくなる。これは活性化エネルギー以上のエネルギーをもつ粒子の割合が増えるためと考えられる。", pit:"傾向を述べるだけで終わらず、化学的な意味まで書きます。"},
+  {g:"judge", en:"Analyse", ja:"分析しなさい", what:"データや情報を分解して、重要な要素や構造を明らかにします。",
+   q:"弱酸を強塩基で滴定した滴定曲線を分析しなさい。", a:"当量点の pH が7より大きいこと、半中和点の pH から pK<sub>a</sub> が読み取れることなどを、曲線の具体的な部分を示しながら述べる。", pit:"曲線全体の感想ではなく、部分ごとに何が読み取れるかを書きます。"},
+  {g:"judge", en:"Comment", ja:"コメントしなさい", what:"与えられた記述や計算結果をもとに、判断を述べます。",
+   q:"求めた % 誤差 8 % と % 不確かさ 3 % についてコメントしなさい。", a:"% 誤差が % 不確かさより大きいので、ランダム誤差だけでは説明できず、系統誤差（熱の損失など）があったと考えられる。", pit:"数値を繰り返すだけでなく、そこから言える判断を書きます。"},
+  {g:"judge", en:"Evaluate", ja:"評価しなさい", what:"長所と限界を比べて、価値や妥当性を判断します。",
+   q:"発泡ポリスチレンのコップを用いた中和熱の測定方法を評価しなさい。", a:"長所（断熱性が高く、操作が簡単）と限界（ふたのすき間から熱が逃げる、温度計の不確かさ）を挙げ、全体としての妥当性と改善策を述べる。", pit:"弱点だけを並べるのは評価になりません。長所と限界の両方と、最後の判断が必要です。"},
+  {g:"judge", en:"Discuss", ja:"論じなさい", what:"複数の観点や主張をバランスよく検討し、根拠のある結論を示します。",
+   q:"燃料として水素を利用することについて論じなさい。", a:"燃焼で二酸化炭素を出さないという利点と、製造にエネルギーが必要で貯蔵や運搬が難しいという課題を比べ、製造方法によって評価が変わるという結論を示す。", pit:"一方の立場だけを書くと得点が伸びません。結論で自分の判断を明確にします。"},
+  {g:"judge", en:"Formulate", ja:"表しなさい", what:"関係する考えや式を、正確かつ体系的に表します。化学では反応式を書く問題でよく使われます。",
+   q:"プロパンの完全燃焼を表す化学反応式を表しなさい。", a:"C<sub>3</sub>H<sub>8</sub> + 5O<sub>2</sub> → 3CO<sub>2</sub> + 4H<sub>2</sub>O", pit:"係数の確認と、指示があれば状態記号（g）（l）を忘れないようにします。"},
+  // draw
+  {g:"draw", en:"Draw", ja:"描きなさい", what:"ラベルをつけた正確な図やグラフを描きます。直線には定規を使います。",
+   q:"アンモニア分子のルイス構造を描きなさい。", a:"N と3つの H をそれぞれ共有電子対で結び、N 上に非共有電子対を1つ描く。", pit:"非共有電子対の描き忘れが最も多い失点です。"},
+  {g:"draw", en:"Sketch", ja:"概形を描きなさい", what:"形や関係の大まかな様子が分かる図やグラフを描きます。重要な特徴は入れます。",
+   q:"ある温度の気体分子のエネルギー分布に、より高い温度の分布を重ねて概形を描きなさい。", a:"原点から始まる曲線で、高温側はピークが低く右にずれ、裾が広がる。曲線の下の面積は同じになるように描く。", pit:"ピークの高さと位置、横軸に接しない裾、の3点が採点されやすい特徴です。"},
+  {g:"draw", en:"Annotate", ja:"注釈をつけなさい", what:"図やグラフに短い説明を書き加えます。",
+   q:"エンタルピー図に、活性化エネルギーと反応エンタルピーを注釈として書き加えなさい。", a:"矢印の向きと始点・終点を正確に示し、E<sub>a</sub> と ΔH を書き入れる。", pit:"矢印の始点がずれると、別の量を示したことになります。"},
+  {g:"draw", en:"Construct", ja:"作成しなさい", what:"情報を図、表、グラフなどの形に整理して示します。",
+   q:"測定結果から、温度と時間のグラフを作成しなさい。", a:"軸の名前と単位、適切な目盛り、正確な点、最適な線（直線または曲線）を入れる。", pit:"軸の単位と、点どうしを折れ線でつなぐ誤りに注意します。"},
+  // inquiry
+  {g:"inquiry", en:"Design", ja:"計画しなさい", what:"実験の方法や手順を計画します。",
+   q:"温度がチオ硫酸ナトリウムと塩酸の反応速度に与える影響を調べる実験を計画しなさい。", a:"独立変数（温度）、従属変数（溶液が濁るまでの時間）、制御変数（濃度・体積・容器）と、それぞれの具体的な操作や測定方法を書く。", pit:"変数をどう制御するか（方法）まで書かないと得点になりません。"}
+];
+
+const list = document.getElementById("list");
+const chipsEl = document.getElementById("chips");
+const q = document.getElementById("q");
+const empty = document.getElementById("empty");
+let active = "all";
+
+function strip(html){ const d=document.createElement("div"); d.innerHTML=html; return d.textContent; }
+
+function render(){
+  const term = q.value.trim().toLowerCase();
+  list.innerHTML = "";
+  let shown = 0;
+  GROUPS.forEach(g=>{
+    if(active!=="all" && active!==g.id) return;
+    const items = TERMS.filter(t=>t.g===g.id).filter(t=>{
+      if(!term) return true;
+      return (t.en+" "+t.ja+" "+strip(t.what)+" "+strip(t.q)).toLowerCase().includes(term);
+    });
+    if(!items.length) return;
+    shown += items.length;
+    const head = document.createElement("div");
+    head.className="group-head";
+    head.innerHTML = `<h2>${g.name}</h2><p>${g.desc}</p>`;
+    list.appendChild(head);
+    const grid = document.createElement("div");
+    grid.className="cards";
+    items.forEach(t=>{
+      const c=document.createElement("article");
+      c.className="card";
+      c.innerHTML = `
+        <div class="term"><span class="en">${t.en}</span><span class="ja">${t.ja}</span></div>
+        <p class="what">${t.what}</p>
+        <div class="ex"><b>例題</b><p>${t.q}</p><b style="margin-top:6px">得点になる答え方</b><p>${t.a}</p></div>
+        <div class="pit"><b>失点に注意：</b>${t.pit}</div>`;
+      grid.appendChild(c);
+    });
+    list.appendChild(grid);
+  });
+  empty.style.display = shown ? "none" : "block";
+}
+
+[{id:"all",name:"すべて"}].concat(GROUPS).forEach(g=>{
+  const b=document.createElement("button");
+  b.type="button"; b.className="chip"; b.id="chip-"+g.id;
+  b.textContent=g.name;
+  b.setAttribute("aria-pressed", g.id==="all" ? "true":"false");
+  b.addEventListener("click",()=>{
+    active=g.id;
+    chipsEl.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed", x===b ? "true":"false"));
+    render();
+  });
+  chipsEl.appendChild(b);
+});
+q.addEventListener("input", render);
+render();
+</script>
+</body>
+</html>

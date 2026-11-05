@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IA 不確かさ計算ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: two-column workbench (inputs left, result right) that stacks on phones. */
+:root{
+  --ink:#1c2a3a;--muted:#5b6878;--paper:#f6f8fa;--card:#ffffff;--rule:#d8dfe7;
+  --accent:#1f5fa8;--accent-soft:#e3edf8;--warn:#9a5b00;--warn-soft:#fbf1df;
+  --bad:#a3302a;--bad-soft:#f9e4e2;--ok:#2e6b3f;--ok-soft:#e5f2e8;
+  --font-display:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --font-body:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#e4eaf1;--muted:#9aa8b8;--paper:#11171e;--card:#18212b;--rule:#2b3846;
+    --accent:#7fb2ec;--accent-soft:#1d2f45;--warn:#f0b866;--warn-soft:#3a2c17;
+    --bad:#f09a92;--bad-soft:#3b1f1d;--ok:#8fd0a0;--ok-soft:#1c3324;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#e4eaf1;--muted:#9aa8b8;--paper:#11171e;--card:#18212b;--rule:#2b3846;
+  --accent:#7fb2ec;--accent-soft:#1d2f45;--warn:#f0b866;--warn-soft:#3a2c17;
+  --bad:#f09a92;--bad-soft:#3b1f1d;--ok:#8fd0a0;--ok-soft:#1c3324;color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15.5px;line-height:1.7}
+.wrap{max-width:1120px;margin:0 auto;padding:0 18px}
+header{border-bottom:1px solid var(--rule);background:var(--card)}
+header .wrap{padding:28px 18px 22px}
+.kicker{font-family:var(--font-mono);font-size:13px;color:var(--accent);margin:0 0 4px;letter-spacing:.04em}
+h1{font-family:var(--font-display);font-size:clamp(24px,3.6vw,32px);margin:0 0 8px;line-height:1.3;text-wrap:balance}
+header p.lead{margin:0;max-width:46em}
+h2{font-family:var(--font-display);font-size:19px;margin:0 0 10px;text-wrap:balance}
+h3{font-family:var(--font-display);font-size:16px;margin:0 0 6px}
+main .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;padding-top:20px;padding-bottom:20px;align-items:start}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:18px}
+.stack{display:flex;flex-direction:column;gap:18px}
+.examples{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+button{font:inherit;cursor:pointer}
+.btn{font-size:13.5px;padding:6px 12px;border-radius:6px;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--card);border-color:var(--accent)}
+.btn:focus-visible,input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th{font-size:12.5px;color:var(--muted);font-weight:500;text-align:left;padding:4px 6px;border-bottom:1px solid var(--rule)}
+td{padding:5px 4px}
+td input{width:100%;font:inherit;font-family:var(--font-mono);font-size:14px;padding:6px 8px;border:1px solid var(--rule);border-radius:5px;background:var(--paper);color:var(--ink);font-variant-numeric:tabular-nums}
+td.pm{color:var(--muted);text-align:center;width:18px}
+.del{border:0;background:none;color:var(--muted);font-size:18px;padding:2px 8px}
+.del:hover{color:var(--bad)}
+label.lbl{display:block;font-size:13px;color:var(--muted);margin:14px 0 4px}
+#formula{width:100%;font-family:var(--font-mono);font-size:17px;padding:10px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.row > div{flex:1 1 140px}
+.row input,.row select{width:100%;font:inherit;font-size:14px;padding:7px 8px;border:1px solid var(--rule);border-radius:5px;background:var(--paper);color:var(--ink)}
+.hint{font-size:13px;color:var(--muted);margin:6px 0 0}
+.result{border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:14px 16px}
+.result .big{font-family:var(--font-mono);font-size:clamp(20px,3vw,26px);font-variant-numeric:tabular-nums;word-break:break-word}
+.result .sub{font-size:13.5px;color:var(--muted);margin-top:2px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{font-size:13px;font-family:var(--font-mono);background:var(--card);border:1px solid var(--rule);border-radius:999px;padding:2px 10px}
+.err{background:var(--bad-soft);color:var(--ink);border-left:4px solid var(--bad);border-radius:6px;padding:12px 14px}
+.warnbox{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:6px;padding:10px 14px;font-size:14px;margin-top:10px}
+.okbox{background:var(--ok-soft);border-left:4px solid var(--ok);border-radius:6px;padding:10px 14px;font-size:14px;margin-top:10px}
+ol.steps{margin:0;padding-left:22px}
+ol.steps li{margin:0 0 10px}
+ol.steps code,.mono{font-family:var(--font-mono);font-size:14px}
+.rule-tag{display:inline-block;font-size:12px;padding:0 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-left:4px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.rules div{border:1px solid var(--rule);border-radius:6px;padding:10px 12px;font-size:14px}
+.rules b{display:block;font-family:var(--font-display)}
+footer{border-top:1px solid var(--rule);padding:20px 0 36px;font-size:13px;color:var(--muted)}
+footer p{margin:4px 0;max-width:62em}
+sub,sup{font-size:.75em;line-height:0}
+@media (max-width:860px){ main .wrap{grid-template-columns:minmax(0,1fr)} }
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+<link rel="stylesheet" href="/assets/bar.css">
+</head>
+<body>
+<header class="oc-bar"><div class="oc-bar-in"><a class="oc-logo" href="/"><svg width="18" height="26" viewBox="0 0 18 26" aria-hidden="true"><path d="M9 1C11.5 4.5 13 6.6 13 8.6A4 4 0 0 1 5 8.6C5 6.6 6.5 4.5 9 1Z" fill="var(--oc-flame)"/><rect x="5" y="12" width="8" height="13" rx="1.5" fill="none" stroke="var(--oc-ink)" stroke-width="1.5"/><line x1="9" y1="10" x2="9" y2="12" stroke="var(--oc-ink)" stroke-width="1.2"/></svg><span>ひとつのろうそく</span><small>日本語で学ぶDP化学</small></a><nav class="oc-nav" aria-label="サイト内"><a href="/teaching/">授業と実験</a><a href="/tools/" aria-current="page">学習ツール</a><a href="/ia-guide/">IAガイド</a><a href="/practice/">実践記録</a><a href="/about/">このサイトについて</a></nav></div></header>
+<header>
+  <div class="wrap">
+    <p class="kicker">IB DP CHEMISTRY · IA TOOLKIT</p>
+    <h1>IA 不確かさ計算ツール</h1>
+    <p class="lead">測定値とその不確かさを入れ、計算式を書くと、処理後の値の不確かさを途中経過つきで計算します。IAのデータ分析で使う「絶対不確かさ」「% 不確かさ」の伝播と、% 誤差との比較まで確認できます。</p>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <div class="stack">
+    <section class="panel" aria-labelledby="h-input">
+      <h2 id="h-input">1. 測定値を入れる</h2>
+      <div class="examples" aria-label="例を読み込む">
+        <button class="btn" type="button" id="ex-heat">例：中和熱の熱量 q = mcΔT</button>
+        <button class="btn" type="button" id="ex-titr">例：滴定から濃度</button>
+        <button class="btn" type="button" id="ex-gas">例：気体のモル質量</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th style="width:13%">記号</th><th style="width:16%">測定値</th><th></th><th style="width:16%">絶対不確かさ</th><th style="width:17%">単位</th><th>メモ</th><th></th></tr></thead>
+          <tbody id="vars"></tbody>
+        </table>
+      </div>
+      <button class="btn" type="button" id="add" style="margin-top:8px">＋ 測定値を追加</button>
+      <p class="hint">記号は英字で始めてください（例：m、T1、V_NaOH）。不確かさが分からない値は、下の「器具の不確かさ」で求められます。</p>
+
+      <label class="lbl" for="formula">2. 計算式</label>
+      <input id="formula" type="text" spellcheck="false" autocomplete="off" value="">
+      <p class="hint">使える記号：＋ − × は <code class="mono">+ - *</code>、÷ は <code class="mono">/</code>、累乗は <code class="mono">^</code>、かっこ <code class="mono">( )</code>。式の中の数値（4.18 など）は不確かさのない定数として扱います。</p>
+
+      <div class="row" style="margin-top:12px">
+        <div><label class="lbl" for="unit" style="margin-top:0">答えの単位</label><input id="unit" type="text"></div>
+        <div><label class="lbl" for="sf" style="margin-top:0">不確かさの有効数字</label>
+          <select id="sf"><option value="1" selected>1桁（標準）</option><option value="2">2桁</option></select></div>
+        <div><label class="lbl" for="lit" style="margin-top:0">文献値（任意）</label><input id="lit" type="text" inputmode="decimal" placeholder="例：57100"></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="h-inst">
+      <h2 id="h-inst">器具の不確かさを求める</h2>
+      <div class="row">
+        <div><label class="lbl" for="itype" style="margin-top:0">器具の種類</label>
+          <select id="itype">
+            <option value="analog">目盛りを読む（温度計など）</option>
+            <option value="digital">デジタル表示（電子天秤など）</option>
+          </select></div>
+        <div><label class="lbl" for="ires" style="margin-top:0">最小目盛り／最小表示</label><input id="ires" type="text" inputmode="decimal" value="1"></div>
+        <div><label class="lbl" for="itwice" style="margin-top:0">読み取り回数</label>
+          <select id="itwice"><option value="1">1回</option><option value="2">2回（差をとる）</option></select></div>
+      </div>
+      <div class="okbox" id="inst-out"></div>
+      <p class="hint">ビュレットの滴下量や温度変化のように、2回読んで差をとる量は「2回」を選びます。器具に許容誤差が表示されている場合（ホールピペットの ±0.06 cm<sup>3</sup> など）は、その値を使います。</p>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="panel" aria-labelledby="h-res" aria-live="polite">
+      <h2 id="h-res">結果</h2>
+      <div id="result"></div>
+      <div id="compare"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="h-steps">
+      <h2 id="h-steps">途中経過</h2>
+      <div id="steps"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="h-rules">
+      <h2 id="h-rules">伝播の3つのルール</h2>
+      <div class="rules">
+        <div><b>足し算・引き算</b>絶対不確かさを足す。<br><span class="mono">(25.0 ± 0.1) − (20.0 ± 0.1) = 5.0 ± 0.2</span></div>
+        <div><b>掛け算・割り算</b>% 不確かさを足す。<br><span class="mono">2 % + 1 % → 3 %</span></div>
+        <div><b>累乗</b>% 不確かさに指数（の絶対値）を掛ける。<br><span class="mono">x² なら 2 倍</span></div>
+      </div>
+      <p class="hint">途中の値は丸めずに計算し、最後に不確かさを1桁（または2桁）に丸め、測定値をその位にそろえます。</p>
+    </section>
+  </div>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>2026年11月 初版</p>
+    <p>本ツールは、国際バカロレア機構（IBO）とは関係のない、個人が作成した学習用ツールです。IAでの不確かさの扱いは、担当の先生の指示と最新の「化学」指導の手引きに従ってください。入力した値はこのページの中だけで計算され、どこにも送信されません。</p>
+  </div>
+</footer>
+<footer class="oc-foot"><div class="oc-foot-in">
+<p><span class="oc-foot-name">ひとつのろうそく</span>（onecandle-chem.com）　日本語で学ぶ・教えるDP化学</p>
+<p>本サイトは、国際バカロレア機構（IBO）とは関係のない、個人が運営する学習資料のサイトです。教材とツールは作成者のオリジナルで、IBの過去問・マークスキーム・指導の手引きの文章は掲載していません。</p>
+<p>一部の教材は AI を使って作成し、作成者が内容を確認しています。利用条件は<a href="/about/#terms">このサイトについて</a>をご覧ください。</p>
+</div></footer>
+
+<script id="core">
+/* ===== core: parser and propagation (no DOM) ===== */
+function tokenize(s){
+  const out=[]; let i=0;
+  s=s.replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-").replace(/（/g,"(").replace(/）/g,")");
+  while(i<s.length){
+    const c=s[i];
+    if(/\s/.test(c)){i++;continue;}
+    if(/[0-9.]/.test(c)){
+      let j=i; while(j<s.length && /[0-9.]/.test(s[j])) j++;
+      if(j<s.length && /[eE]/.test(s[j]) && /[0-9+\-]/.test(s[j+1]||"")){ j++; if(/[+\-]/.test(s[j])) j++; while(j<s.length && /[0-9]/.test(s[j])) j++; }
+      const txt=s.slice(i,j); const v=Number(txt);
+      if(!isFinite(v)) throw new Error("数値「"+txt+"」を読み取れません。");
+      out.push({t:"num",v:v,txt:txt}); i=j; continue;
+    }
+    if(/[A-Za-zΔα-ωΑ-Ω_]/.test(c)){
+      let j=i; while(j<s.length && /[A-Za-z0-9Δα-ωΑ-Ω_]/.test(s[j])) j++;
+      out.push({t:"id",v:s.slice(i,j)}); i=j; continue;
+    }
+    if("+-*/^()".includes(c)){ out.push({t:"op",v:c}); i++; continue; }
+    throw new Error("式に使えない文字「"+c+"」があります。");
+  }
+  return out;
+}
+function parse(s){
+  const tk=tokenize(s); let p=0;
+  if(!tk.length) throw new Error("計算式を入力してください。");
+  const peek=()=>tk[p], next=()=>tk[p++];
+  function expr(){ let n=term(); while(peek()&&peek().t==="op"&&(peek().v==="+"||peek().v==="-")){ const o=next().v; n={k:"bin",o:o,a:n,b:term()}; } return n; }
+  function term(){ let n=unary(); while(peek()&&peek().t==="op"&&(peek().v==="*"||peek().v==="/")){ const o=next().v; n={k:"bin",o:o,a:n,b:unary()}; } return n; }
+  function unary(){ if(peek()&&peek().t==="op"&&peek().v==="-"){ next(); return {k:"neg",a:unary()}; } if(peek()&&peek().t==="op"&&peek().v==="+"){ next(); return unary(); } return power(); }
+  function power(){ const base=primary(); if(peek()&&peek().t==="op"&&peek().v==="^"){ next(); return {k:"bin",o:"^",a:base,b:unary()}; } return base; }
+  function primary(){
+    const t=next();
+    if(!t) throw new Error("式が途中で終わっています。");
+    if(t.t==="num") return {k:"num",v:t.v,txt:t.txt};
+    if(t.t==="id"){ if(peek()&&peek().t==="op"&&peek().v==="(") throw new Error("関数「"+t.v+"」はこのツールでは使えません（log などは未対応）。"); return {k:"var",name:t.v}; }
+    if(t.t==="op"&&t.v==="("){ const n=expr(); const c=next(); if(!c||c.v!==")") throw new Error("かっこ「(」が閉じていません。"); return n; }
+    throw new Error("「"+t.v+"」の位置がおかしいようです。");
+  }
+  const tree=expr();
+  if(p<tk.length) throw new Error("「"+tk[p].v+"」の位置がおかしいようです。かっこや演算子を確認してください。");
+  return tree;
+}
+function prec(n){ if(n.k!=="bin") return 9; return n.o==="^"?3:(n.o==="*"||n.o==="/")?2:1; }
+function show(n){
+  if(n.k==="num") return n.txt;
+  if(n.k==="var") return n.name;
+  if(n.k==="neg") return "−"+wrap(n.a,3);
+  const sym={"+":" + ","-":" − ","*":" × ","/":" ÷ ","^":"^"}[n.o];
+  const pa=prec(n);
+  const left=wrap(n.a,pa);
+  const right=wrap(n.b, (n.o==="-"||n.o==="/")?pa+0.5:pa);
+  return left+sym+right;
+}
+function wrap(n,p){ const s=show(n); return prec(n)<p?"("+s+")":s; }
+function countVars(n,acc){ acc=acc||{}; if(n.k==="var") acc[n.name]=(acc[n.name]||0)+1; if(n.a) countVars(n.a,acc); if(n.b) countVars(n.b,acc); return acc; }
+
+function g3(x){ if(x===0) return "0"; const a=Math.abs(x); if(a>=1e5||a<1e-3) return x.toExponential(2).replace("e"," × 10^").replace("+",""); return Number(x.toPrecision(3)).toString(); }
+function pct(rel){ return g3(rel*100)+" %"; }
+
+function evaluate(tree, vars){
+  const steps=[];
+  function ev(n){
+    if(n.k==="num") return {v:n.v,u:0,c:true};
+    if(n.k==="var"){
+      const d=vars[n.name];
+      if(!d) throw new Error("記号「"+n.name+"」が測定値の表にありません。表に追加するか、式の記号を確認してください。");
+      return {v:d.v,u:Math.abs(d.u),c:false};
+    }
+    if(n.k==="neg"){ const a=ev(n.a); return {v:-a.v,u:a.u,c:a.c}; }
+    const a=ev(n.a), b=ev(n.b);
+    const label=show(n);
+    if(n.o==="+"||n.o==="-"){
+      const v= n.o==="+"? a.v+b.v : a.v-b.v;
+      const u=a.u+b.u;
+      if(!(a.c&&b.c)) steps.push({rule:"和・差",expr:label,
+        text:"足し算・引き算なので、絶対不確かさを足す："+g3(a.u)+" + "+g3(b.u)+" = ±"+g3(u),
+        v:v,u:u});
+      return {v:v,u:u,c:a.c&&b.c};
+    }
+    if(n.o==="*"||n.o==="/"){
+      if(n.o==="/" && b.v===0) throw new Error("0 で割る計算があります（"+label+"）。");
+      const v= n.o==="*"? a.v*b.v : a.v/b.v;
+      const ra = a.v===0 ? (a.u===0?0:Infinity) : a.u/Math.abs(a.v);
+      const rb = b.v===0 ? 0 : b.u/Math.abs(b.v);
+      if(!isFinite(ra)) throw new Error("値が 0 の量を掛けているため、% 不確かさが求められません（"+label+"）。");
+      const r=ra+rb, u=Math.abs(v)*r;
+      if(!(a.c&&b.c)){
+        const parts=[];
+        parts.push(a.c? "定数 0 %" : pct(ra));
+        parts.push(b.c? "定数 0 %" : pct(rb));
+        steps.push({rule:"積・商",expr:label,
+          text:(n.o==="*"?"掛け算":"割り算")+"なので、% 不確かさを足す："+parts.join(" + ")+" = "+pct(r)+"　→ 絶対不確かさ ±"+g3(u),
+          v:v,u:u});
+      }
+      return {v:v,u:u,c:a.c&&b.c};
+    }
+    if(n.o==="^"){
+      if(!b.c) throw new Error("累乗の指数には測定値ではなく数値を使ってください（"+label+"）。");
+      if(a.v<0 && !Number.isInteger(b.v)) throw new Error("負の値を整数でない指数で累乗しています（"+label+"）。");
+      const v=Math.pow(a.v,b.v);
+      const ra = a.v===0?0:a.u/Math.abs(a.v);
+      const r=Math.abs(b.v)*ra, u=Math.abs(v)*r;
+      if(!a.c) steps.push({rule:"累乗",expr:label,
+        text:"累乗なので、% 不確かさに指数を掛ける："+pct(ra)+" × "+Math.abs(b.v)+" = "+pct(r)+"　→ 絶対不確かさ ±"+g3(u),
+        v:v,u:u});
+      return {v:v,u:u,c:a.c};
+    }
+    throw new Error("計算できない部分があります。");
+  }
+  const r=ev(tree);
+  if(!isFinite(r.v)) throw new Error("計算結果が数値になりませんでした。式と値を確認してください。");
+  return {v:r.v,u:r.u,steps:steps};
+}
+
+/* round uncertainty to n s.f., then the value to the same decimal place */
+function roundPair(v,u,n){
+  if(u===0) return {vs:g3(v),us:"0",dec:null};
+  let e=Math.floor(Math.log10(u));
+  let dec=n-1-e;
+  let ur=Math.round(u*Math.pow(10,dec))/Math.pow(10,dec);
+  const e2=Math.floor(Math.log10(ur));
+  if(e2!==e){ dec=n-1-e2; ur=Math.round(u*Math.pow(10,dec))/Math.pow(10,dec); }
+  let vr=Math.round(v*Math.pow(10,dec))/Math.pow(10,dec);
+  const f=x=> dec>0 ? x.toFixed(dec) : String(Math.round(x));
+  if(Object.is(vr,-0)) vr=0;
+  return {vs:f(vr),us:f(ur),dec:dec};
+}
+function instrument(type,res,times){
+  const base = type==="digital" ? res : res/2;
+  return base*times;
+}
+</script>
+
+<script>
+/* ===== UI ===== */
+const EXAMPLES = {
+  heat:{formula:"m * 4.18 * (T2 - T1)", unit:"J", lit:"",
+    vars:[["m","50.0","0.5","g","水溶液の質量（メスシリンダー 50.0 cm³）"],["T1","21.3","0.1","°C","反応前の温度"],["T2","28.6","0.1","°C","最高温度"]]},
+  titr:{formula:"cB * (V2 - V1) / VA", unit:"mol dm⁻³", lit:"0.0950",
+    vars:[["cB","0.1000","0.0005","mol dm⁻³","NaOH 標準溶液"],["V1","0.50","0.05","cm³","ビュレット 初めの読み"],["V2","24.10","0.05","cm³","ビュレット 終わりの読み"],["VA","25.00","0.06","cm³","ホールピペットで取った HCl"]]},
+  gas:{formula:"m * 8.31 * T / (P * V)", unit:"g mol⁻¹", lit:"58.12",
+    vars:[["m","0.250","0.001","g","気化させた液体の質量"],["T","373","1","K","気体の温度"],["P","101000","500","Pa","大気圧"],["V","0.000130","0.000001","m³","気体の体積（130 cm³）"]]}
+};
+const tbody=document.getElementById("vars");
+const fEl=document.getElementById("formula"), unitEl=document.getElementById("unit"), sfEl=document.getElementById("sf"), litEl=document.getElementById("lit");
+let rowId=0;
+
+function addRow(d){
+  d=d||["","","","",""];
+  const id=++rowId;
+  const tr=document.createElement("tr");
+  const cells=[["name","記号"],["val","測定値"],null,["unc","絶対不確かさ"],["unit","単位"],["note","メモ"]];
+  cells.forEach((c,i)=>{
+    const td=document.createElement("td");
+    if(c===null){ td.className="pm"; td.textContent="±"; tr.appendChild(td); return; }
+    const inp=document.createElement("input");
+    inp.id="v"+id+"-"+c[0]; inp.setAttribute("aria-label",c[1]); inp.dataset.k=c[0];
+    if(c[0]==="val"||c[0]==="unc") inp.inputMode="decimal";
+    const map={name:0,val:1,unc:2,unit:3,note:4};
+    inp.value=d[map[c[0]]]||"";
+    inp.addEventListener("input",calc);
+    td.appendChild(inp); tr.appendChild(td);
+  });
+  const td=document.createElement("td");
+  const b=document.createElement("button"); b.type="button"; b.className="del"; b.textContent="×"; b.id="del"+id;
+  b.setAttribute("aria-label","この行を削除");
+  b.addEventListener("click",()=>{tr.remove();calc();});
+  td.appendChild(b); tr.appendChild(td);
+  tbody.appendChild(tr);
+}
+function load(key){
+  const ex=EXAMPLES[key];
+  tbody.innerHTML=""; ex.vars.forEach(addRow);
+  fEl.value=ex.formula; unitEl.value=ex.unit; litEl.value=ex.lit;
+  calc();
+}
+function num(s){ s=String(s).trim().replace(/,/g,"").replace(/−/g,"-"); if(s==="") return NaN; return Number(s); }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function calc(){
+  const res=document.getElementById("result"), st=document.getElementById("steps"), cmp=document.getElementById("compare");
+  cmp.innerHTML="";
+  const vars={}; const problems=[];
+  tbody.querySelectorAll("tr").forEach(tr=>{
+    const g=k=>tr.querySelector('[data-k="'+k+'"]').value;
+    const name=g("name").trim(); if(!name) return;
+    if(!/^[A-Za-zΔα-ωΑ-Ω_][A-Za-z0-9Δα-ωΑ-Ω_]*$/.test(name)){ problems.push("記号「"+name+"」は英字で始め、英数字と _ だけで書いてください。"); return; }
+    const v=num(g("val")), u=num(g("unc")===""?"0":g("unc"));
+    if(isNaN(v)){ problems.push("「"+name+"」の測定値を数値で入れてください。"); return; }
+    if(isNaN(u)||u<0){ problems.push("「"+name+"」の不確かさを 0 以上の数値で入れてください。"); return; }
+    if(vars[name]) problems.push("記号「"+name+"」が2回使われています。別の記号にしてください。");
+    vars[name]={v:v,u:u,unit:g("unit").trim()};
+  });
+  try{
+    if(problems.length) throw new Error(problems[0]);
+    const tree=parse(fEl.value);
+    const out=evaluate(tree,vars);
+    const n=Number(sfEl.value);
+    const rp=roundPair(out.v,out.u,n);
+    const rel=out.v===0?0:out.u/Math.abs(out.v);
+    const unit=unitEl.value.trim();
+    res.innerHTML=`<div class="result">
+      <div class="big">${esc(rp.vs)} ± ${esc(rp.us)}${unit?" "+esc(unit):""}</div>
+      <div class="sub">IAの表やデータ分析にはこの形で書きます。</div>
+      <div class="pills"><span class="pill">% 不確かさ ${pct(rel)}</span><span class="pill">丸める前 ${g3(out.v)} ± ${g3(out.u)}</span></div>
+    </div>`;
+    const counts=countVars(tree);
+    const dup=Object.keys(counts).filter(k=>counts[k]>1);
+    if(dup.length) res.innerHTML+=`<div class="warnbox">記号 ${dup.map(esc).join("、")} が式に2回以上出てきます。この方法では、同じ測定値の不確かさを二重に数えるため、不確かさがやや大きめに出ます。IAでは、そのことに触れておくと丁寧です。</div>`;
+    // literature comparison
+    const lit=num(litEl.value);
+    if(!isNaN(lit) && lit!==0){
+      const perr=Math.abs(out.v-lit)/Math.abs(lit);
+      const within = perr<=rel;
+      cmp.innerHTML=`<div class="${within?"okbox":"warnbox"}">
+        <b>% 誤差 ${pct(perr)}</b>（文献値 ${esc(litEl.value.trim())}${unit?" "+esc(unit):""}）と % 不確かさ ${pct(rel)} を比べると、
+        ${within
+          ? "% 誤差が % 不確かさの範囲内です。結果と文献値のずれは、ランダム誤差で説明できる可能性があります。"
+          : "% 誤差が % 不確かさより大きくなっています。ランダム誤差だけでは説明できないため、系統誤差（熱の損失、器具の校正、試薬の純度など）を評価で検討しましょう。"}
+      </div>`;
+    }
+    if(!out.steps.length){ st.innerHTML='<p class="hint">伝播の計算はありません（不確かさのある測定値が式に含まれていません）。</p>'; }
+    else{
+      st.innerHTML="<ol class='steps'>"+out.steps.map(s=>`<li><code>${esc(s.expr)}</code><span class="rule-tag">${s.rule}</span><br>${esc(s.text)}<br><span class="hint">この時点の値：${g3(s.v)} ± ${g3(s.u)}</span></li>`).join("")+"</ol>";
+    }
+  }catch(e){
+    res.innerHTML=`<div class="err"><b>計算できません。</b><br>${esc(e.message)}</div>`;
+    st.innerHTML='<p class="hint">エラーを直すと、ここに途中経過が出ます。</p>';
+  }
+}
+function instCalc(){
+  const out=document.getElementById("inst-out");
+  const type=document.getElementById("itype").value;
+  const r=num(document.getElementById("ires").value);
+  const times=Number(document.getElementById("itwice").value);
+  if(isNaN(r)||r<=0){ out.className="err"; out.textContent="最小目盛り（最小表示）を正の数値で入れてください。"; return; }
+  out.className="okbox";
+  const one = type==="digital"? r : r/2;
+  const tot = instrument(type,r,times);
+  const why = type==="digital" ? "デジタル表示は、最小表示の1つ分（±"+g3(one)+"）" : "目盛りを読む器具は、最小目盛りの半分（±"+g3(one)+"）";
+  out.innerHTML = `不確かさ <b class="mono">±${g3(tot)}</b><br><span class="hint">${why}${times===2?"。2回読んで差をとるので、2つの不確かさを足して ±"+g3(tot):""}。</span>`;
+}
+
+document.getElementById("add").addEventListener("click",()=>{addRow();});
+document.getElementById("ex-heat").addEventListener("click",()=>load("heat"));
+document.getElementById("ex-titr").addEventListener("click",()=>load("titr"));
+document.getElementById("ex-gas").addEventListener("click",()=>load("gas"));
+[fEl,unitEl,sfEl,litEl].forEach(el=>el.addEventListener("input",calc));
+["itype","ires","itwice"].forEach(id=>document.getElementById(id).addEventListener("input",instCalc));
+load("heat"); instCalc();
+</script>
+</body>
+</html>
